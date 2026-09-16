@@ -37,7 +37,7 @@ jobs:
           countdown='''<div class="dealCountdown" id="dealCountdown"><span class="dealFree">FREE CUSTOM DESIGN</span><span class="dealLead">ORDER BY</span><div class="dealUnits"><div class="dealUnit"><b id="dd">04</b><span>DAYS</span></div><span class="dealColon">:</span><div class="dealUnit"><b id="hh">00</b><span>HRS</span></div><span class="dealColon">:</span><div class="dealUnit"><b id="mm">00</b><span>MIN</span></div><span class="dealColon">:</span><div class="dealUnit"><b id="ss">00</b><span>SEC</span></div></div><span class="dealEnd">FOR 25% OFF</span></div><script>(function(){const key='pawluv_offer_deadline';let end=localStorage.getItem(key);if(!end){end=String(Date.now()+5*24*60*60*1000);localStorage.setItem(key,end)}function tick(){let left=Math.max(0,Number(end)-Date.now());let d=Math.floor(left/86400000);left%=86400000;let h=Math.floor(left/3600000);left%=3600000;let m=Math.floor(left/60000);let sec=Math.floor(left/1000)%60;for(const [id,v] of [['dd',d],['hh',h],['mm',m],['ss',sec]]){const e=document.getElementById(id);if(e)e.textContent=String(v).padStart(2,'0')}}tick();setInterval(tick,1000)})();</script>'''
           live='''<style id="pawluv-live-effects">
           .reviews{position:relative}
-          .reviewTrack{scroll-behavior:auto;cursor:grab;scrollbar-width:none;-ms-overflow-style:none}
+          .reviewTrack{scroll-behavior:auto;cursor:grab;scrollbar-width:none;-ms-overflow-style:none;touch-action:pan-y;user-select:none}
           .reviewTrack::-webkit-scrollbar{display:none}
           .review{transition:transform .35s ease,box-shadow .35s ease}
           .review:hover{transform:translateY(-7px);box-shadow:0 18px 38px rgba(37,38,63,.12)}
@@ -53,16 +53,19 @@ jobs:
             const track=document.querySelector('.reviewTrack');
             if(track&&!reduce){
               let paused=false,dir=1,last=performance.now();
-              const speed=0.42;
-              track.addEventListener('mouseenter',()=>paused=true);
-              track.addEventListener('mouseleave',()=>paused=false);
+              const speed=0.85;
+              let dragging=false,startX=0,startScroll=0;
+              track.addEventListener('pointerdown',e=>{dragging=true;paused=true;startX=e.clientX;startScroll=track.scrollLeft;track.setPointerCapture&&track.setPointerCapture(e.pointerId);track.style.cursor='grabbing'});
+              track.addEventListener('pointermove',e=>{if(dragging){track.scrollLeft=startScroll-(e.clientX-startX)}});
+              track.addEventListener('pointerup',e=>{dragging=false;track.style.cursor='grab';setTimeout(()=>paused=false,900)});
+              track.addEventListener('pointercancel',()=>{dragging=false;track.style.cursor='grab';setTimeout(()=>paused=false,900)});
+              track.addEventListener('mouseenter',()=>{if(!dragging)paused=true});
+              track.addEventListener('mouseleave',()=>{if(!dragging)paused=false});
               track.addEventListener('touchstart',()=>paused=true,{passive:true});
-              track.addEventListener('touchend',()=>setTimeout(()=>paused=false,1800),{passive:true});
-              track.addEventListener('pointerdown',()=>paused=true);
-              window.addEventListener('pointerup',()=>paused=false);
+              track.addEventListener('touchend',()=>setTimeout(()=>paused=false,900),{passive:true});
               function move(now){
-                const dt=Math.min(32,now-last); last=now;
-                if(!paused){
+                const dt=Math.min(32,now-last);last=now;
+                if(!paused&&!dragging){
                   const max=track.scrollWidth-track.clientWidth;
                   if(max>4){
                     track.scrollLeft+=dir*speed*dt;
@@ -90,5 +93,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git diff --cached --quiet || git commit -m "AUTO FINAL HOME FIX: add live homepage motion"
+          git diff --cached --quiet || git commit -m "AUTO FINAL HOME FIX: fix review carousel interaction"
           git push
