@@ -26,12 +26,15 @@ jobs:
           header_end += len('</header>')
           footer_end += len('</footer>')
           head=s[:header_end]
-          head=re.sub(r'(<a class="promo" href="#shop">).*?(</a>)', r'\1EXTRA 25% OFF OUR BEST SELLERS\2', head, count=1, flags=re.S)
+          head=re.sub(r'(<a class="promo" href="#shop">).*?(</a>)', r'\1FREE CUSTOM DESIGN • EXTRA 25% OFF OUR BEST SELLERS\2', head, count=1, flags=re.S)
           head=re.sub(r'<a class="logo" href="/">.*?</a>', '<a class="logo" href="/"><img src="/assets/pawluv-logo.svg" alt="Pawluv" /></a>', head, count=1, flags=re.S)
-          head=head.replace('position:sticky;top:70px;', 'position:relative;top:auto;')
           hero_end=s.find('</section>', hero_start)+len('</section>')
           hero=s[hero_start:hero_end]
           body=s[hero_end:footer_start]
+          body=re.sub(r'<div class="dealCountdown" id="dealCountdown">.*?</div>\s*<script[^>]*>.*?</script>', '', body, flags=re.S)
+          body=re.sub(r'<div class="dealCountdown" id="dealCountdown">.*?</div>', '', body, flags=re.S)
+          countdown='''<div class="dealCountdown" id="dealCountdown"><span class="dealFree">FREE CUSTOM DESIGN</span><span class="dealLead">ORDER BY</span><div class="dealUnits"><div class="dealUnit"><b id="dd">04</b><span>DAYS</span></div><span class="dealColon">:</span><div class="dealUnit"><b id="hh">00</b><span>HRS</span></div><span class="dealColon">:</span><div class="dealUnit"><b id="mm">00</b><span>MIN</span></div><span class="dealColon">:</span><div class="dealUnit"><b id="ss">00</b><span>SEC</span></div></div><span class="dealEnd">FOR 25% OFF</span></div><script>(function(){const key='pawluv_offer_deadline';let end=localStorage.getItem(key);if(!end){end=String(Date.now()+5*24*60*60*1000);localStorage.setItem(key,end)}function tick(){let left=Math.max(0,Number(end)-Date.now());let d=Math.floor(left/86400000);left%=86400000;let h=Math.floor(left/3600000);left%=3600000;let m=Math.floor(left/60000);let sec=Math.floor(left/1000)%60;for(const [id,v] of [['dd',d],['hh',h],['mm',m],['ss',sec]]){const e=document.getElementById(id);if(e)e.textContent=String(v).padStart(2,'0')} }tick();setInterval(tick,1000)})();</script>'''
+          body=countdown+body
           body=body.replace('position:sticky;top:70px;', 'position:relative;top:auto;')
           footer=s[footer_start:footer_end]
           p.write_text(head+hero+body+footer, encoding='utf-8')
@@ -41,5 +44,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git diff --cached --quiet || git commit -m "AUTO FINAL HOME FIX: clean countdown and scrolling navigation"
+          git diff --cached --quiet || git commit -m "AUTO FINAL HOME FIX: restore offer countdown and free custom design"
           git push
