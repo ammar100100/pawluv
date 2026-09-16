@@ -5,6 +5,7 @@ Premium custom pet jewelry storefront.
 ## Current build
 - Luxury Pawluv landing page
 - Premium mobile-responsive layout
+- Direct live homepage repair: clean document body and remove stray markup
 - Product cards for necklaces, bracelets, and keychains
 - 1–4 pet selector
 - Pet name + photo upload preview
