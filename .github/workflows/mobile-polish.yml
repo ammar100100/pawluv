@@ -1,4 +1,4 @@
-name: Pawluv Mobile Responsive Polish
+name: Pawluv Mobile Responsive Polish v2
 on:
   push:
     branches: [main]
