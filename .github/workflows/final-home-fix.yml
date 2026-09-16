@@ -34,7 +34,9 @@ jobs:
           body=re.sub(r'<div class="dealCountdown" id="dealCountdown">.*?</div>\s*<script[^>]*>.*?</script>', '', body, flags=re.S)
           body=re.sub(r'<div class="dealCountdown" id="dealCountdown">.*?</div>', '', body, flags=re.S)
           body=re.sub(r'<style id="pawluv-live-effects">.*?</style>\s*<script id="pawluv-live-effects-js">.*?</script>', '', body, flags=re.S)
+          body=re.sub(r'<section class="pawluv-how-order".*?</section>', '', body, flags=re.S)
           countdown='''<div class="dealCountdown" id="dealCountdown"><span class="dealFree">FREE CUSTOM DESIGN</span><span class="dealLead">ORDER BY</span><div class="dealUnits"><div class="dealUnit"><b id="dd">04</b><span>DAYS</span></div><span class="dealColon">:</span><div class="dealUnit"><b id="hh">00</b><span>HRS</span></div><span class="dealColon">:</span><div class="dealUnit"><b id="mm">00</b><span>MIN</span></div><span class="dealColon">:</span><div class="dealUnit"><b id="ss">00</b><span>SEC</span></div></div><span class="dealEnd">FOR 25% OFF</span></div><script>(function(){const key='pawluv_offer_deadline';let end=localStorage.getItem(key);if(!end){end=String(Date.now()+5*24*60*60*1000);localStorage.setItem(key,end)}function tick(){let left=Math.max(0,Number(end)-Date.now());let d=Math.floor(left/86400000);left%=86400000;let h=Math.floor(left/3600000);left%=3600000;let m=Math.floor(left/60000);let sec=Math.floor(left/1000)%60;for(const [id,v] of [['dd',d],['hh',h],['mm',m],['ss',sec]]){const e=document.getElementById(id);if(e)e.textContent=String(v).padStart(2,'0')}}tick();setInterval(tick,1000)})();</script>'''
+          how='''<style id="pawluv-how-order-css">.pawluv-how-order{background:linear-gradient(180deg,#fffafa 0%,#fff 100%);padding:34px 0 48px;border-top:1px solid #f4e9ed;border-bottom:1px solid #f4e9ed}.pawluv-how-order .howWrap{max-width:1240px;margin:0 auto;padding:0 20px}.pawluv-how-order img{display:block;width:100%;height:auto;max-width:1200px;margin:0 auto;border-radius:22px;box-shadow:0 12px 35px rgba(37,38,63,.07)}@media(max-width:700px){.pawluv-how-order{padding:24px 0 34px}.pawluv-how-order .howWrap{padding:0 12px}.pawluv-how-order img{border-radius:14px}}</style><section class="pawluv-how-order" id="how"><div class="howWrap"><img src="/assets/how-to-order-pawluv.avif" alt="Pawluv how to order: upload your pet photo, approve the custom pet art, and cherish the finished pet necklace" loading="lazy"></div></section>'''
           live='''<style id="pawluv-live-effects">
           .reviews{position:relative}
           .reviewTrack{scroll-behavior:auto;cursor:grab;scrollbar-width:none;-ms-overflow-style:none;touch-action:pan-y;user-select:none}
@@ -83,7 +85,15 @@ jobs:
               cards.forEach((c,i)=>{c.style.transitionDelay=Math.min(i%4,3)*70+'ms';io.observe(c)});
             }else cards.forEach(c=>c.classList.add('is-visible'));
           })();</script>'''
-          body=countdown+body+live
+          body=countdown+body
+          # Put the Pawluv How-to-Order visual after the reviews and before the product grid.
+          marker='<section class="section homeCat'
+          pos=body.find(marker)
+          if pos>=0:
+              body=body[:pos]+how+body[pos:]
+          else:
+              body=body+how
+          body=body+live
           body=body.replace('position:sticky;top:70px;', 'position:relative;top:auto;')
           footer=s[footer_start:footer_end]
           p.write_text(head+hero+body+footer, encoding='utf-8')
@@ -93,5 +103,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git diff --cached --quiet || git commit -m "AUTO FINAL HOME FIX: fix review carousel interaction"
+          git diff --cached --quiet || git commit -m "AUTO FINAL HOME FIX: add Pawluv how-to-order section"
           git push
